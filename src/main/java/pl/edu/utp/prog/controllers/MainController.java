@@ -1,5 +1,7 @@
 package pl.edu.utp.prog.controllers;
 
+import java.util.List;
+
 import org.controlsfx.validation.Severity;
 import org.controlsfx.validation.ValidationResult;
 import org.controlsfx.validation.ValidationSupport;
@@ -62,8 +64,27 @@ public class MainController {
 	void buttonAction(ActionEvent event) {
 		Student student = new Student();
 		student.setName(this.TextField_Name.getText());
+		student.setEmail(this.TextField_Email.getText());
+		student.setStudent(true);
 		repo.save(student);
 		System.out.println("Added to the database!");
+
+		//for(ValidationSupport v : val) {v.errorDecorationEnabledProperty().set(false);}
+		 this.TextField_Name.clear();
+		 this.TextField_Email.clear();
+		 this.CheckBox_Student.setSelected(false);
+
+		 printStudents();
+
+		
 	}
+	void printStudents() {
+		
+		List<Student> students = repo.findAll();
+		 for (Student s : students) {
+		 System.out.println("id:"+s.getId() + " name:" + s.getName()+ " email:" + s.getEmail());
+		 }
+	}
+
 
 }
