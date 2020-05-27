@@ -74,11 +74,11 @@ public class MainController {
 		 this.TextField_Email.clear();
 		 this.CheckBox_Student.setSelected(false);
 
-		 printStudents();
+		 printStudentsFromDB();
 
 		
 	}
-	void printStudents() {
+	void printStudentsFromDB() {
 		
 		List<Student> students = repo.findAll();
 		 for (Student s : students) {

@@ -7,4 +7,6 @@ import pl.edu.utp.prog.domain.Student;
 
 @Repository
 public interface StudentRepository extends JpaRepository<Student, Long> {
+
+	boolean existsByEmail(String value);
 }
