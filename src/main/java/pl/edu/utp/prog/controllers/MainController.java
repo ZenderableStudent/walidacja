@@ -47,21 +47,32 @@ public class MainController {
 	void initialize() {
 		ValidationSupport vsForTextField = new ValidationSupport();
 		vsForTextField.registerValidator(TextField_Name,
+				Validator.combine(
+				Validator.createEmptyValidator("This field can't be empty"),
+				Validator.createRegexValidator("No numbers here!", "^[a-zA-Z]+", Severity.ERROR),
+				Validator.createPredicateValidator(name -> {
+				return ((String) name).length() < 15 ? true : false;
+				}, "Less letters!", Severity.ERROR)));
+		ValidationSupport vsForEmail = new ValidationSupport();
+		vsForEmail.registerValidator(TextField_Email,
 				Validator.combine(Validator.createEmptyValidator("This field can't be empty"),
-						Validator.createRegexValidator("No numbers here!", "^[a-zA-Z]+", Severity.ERROR),
-						Validator.createPredicateValidator(name -> {
-							return ((String) name).length() < 15 ? true : false;
-						}, "Less letters!", Severity.ERROR)));
-
+						Validator.createRegexValidator("This isn't email", "^\\w+@[a-zA-Z_]+?\\.[a-zA-Z]{2,3}", Severity.ERROR),
+						Validator.createPredicateValidator(email ->{
+							return ((String) email).length()<15 ? true : false;
+							}, "Less letters!", Severity.ERROR)));
 		ValidationSupport vsForCheckBox = new ValidationSupport();
 		vsForCheckBox.registerValidator(CheckBox_Student,
 				(Control c, Boolean newValue) -> ValidationResult.fromErrorIf(c, "Check this checkbox!", !newValue));
 
-		Button_Confirm.disableProperty().bind(vsForTextField.invalidProperty().or(vsForCheckBox.invalidProperty()));
+		Button_Confirm.disableProperty().bind(vsForTextField.invalidProperty().or(vsForCheckBox.invalidProperty().or(vsForEmail.invalidProperty())));
 	}
 
 	@FXML
 	void buttonAction(ActionEvent event) {
+		if(repo.existsByEmail(this.TextField_Email.getText())) {
+			System.out.println("Email exist already.");
+		}
+		else {
 		Student student = new Student();
 		student.setName(this.TextField_Name.getText());
 		student.setEmail(this.TextField_Email.getText());
@@ -75,7 +86,7 @@ public class MainController {
 		 this.CheckBox_Student.setSelected(false);
 
 		 printStudentsFromDB();
-
+		}
 		
 	}
 	void printStudentsFromDB() {

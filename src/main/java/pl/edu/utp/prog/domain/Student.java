@@ -25,6 +25,7 @@ public class Student {
 	
 	@Email(message = "This is not correct email address!")
 	@Unique
+	@Pattern(regexp = "^\\w+@[a-zA-Z_]+?\\.[a-zA-Z] {2,3}", message = "This isn't email!")
 	@NotBlank
 	private String email;
 	
