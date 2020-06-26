@@ -18,6 +18,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import pl.edu.utp.prog.domain.Student;
 import pl.edu.utp.prog.repository.StudentRepository;
+import pl.edu.utp.prog.services.ValidationService;
 
 @Controller
 public class MainController {
@@ -43,28 +44,21 @@ public class MainController {
 	@Autowired
 	private StudentRepository repo;
 
+	@Autowired
+	private ValidationService valServ;
+
 	@FXML
 	void initialize() {
-		ValidationSupport vsForTextField = new ValidationSupport();
-		vsForTextField.registerValidator(TextField_Name,
-				Validator.combine(
-				Validator.createEmptyValidator("This field can't be empty"),
-				Validator.createRegexValidator("No numbers here!", "^[a-zA-Z]+", Severity.ERROR),
-				Validator.createPredicateValidator(name -> {
-				return ((String) name).length() < 15 ? true : false;
-				}, "Less letters!", Severity.ERROR)));
+		ValidationSupport vsForName = new ValidationSupport();
+		vsForName.registerValidator(TextField_Name, valServ.getValidator(Student.class,"name"));
+		
 		ValidationSupport vsForEmail = new ValidationSupport();
-		vsForEmail.registerValidator(TextField_Email,
-				Validator.combine(Validator.createEmptyValidator("This field can't be empty"),
-						Validator.createRegexValidator("This isn't email", "^\\w+@[a-zA-Z_]+?\\.[a-zA-Z]{2,3}", Severity.ERROR),
-						Validator.createPredicateValidator(email ->{
-							return ((String) email).length()<15 ? true : false;
-							}, "Less letters!", Severity.ERROR)));
-		ValidationSupport vsForCheckBox = new ValidationSupport();
-		vsForCheckBox.registerValidator(CheckBox_Student,
-				(Control c, Boolean newValue) -> ValidationResult.fromErrorIf(c, "Check this checkbox!", !newValue));
-
-		Button_Confirm.disableProperty().bind(vsForTextField.invalidProperty().or(vsForCheckBox.invalidProperty().or(vsForEmail.invalidProperty())));
+		vsForEmail.registerValidator(TextField_Email, valServ.getValidator(Student.class, "email"));
+		
+		ValidationSupport vsForCheck = new ValidationSupport();
+		vsForCheck.registerValidator(CheckBox_Student, valServ.getValidator(Student.class, "isStudent"));
+		
+		Button_Confirm.disableProperty().bind(vsForName.invalidProperty().or(vsForCheck.invalidProperty().or(vsForEmail.invalidProperty())));
 	}
 
 	@FXML
@@ -80,7 +74,6 @@ public class MainController {
 		repo.save(student);
 		System.out.println("Added to the database!");
 
-		//for(ValidationSupport v : val) {v.errorDecorationEnabledProperty().set(false);}
 		 this.TextField_Name.clear();
 		 this.TextField_Email.clear();
 		 this.CheckBox_Student.setSelected(false);
